@@ -1,0 +1,45 @@
+import express from "express";
+
+const router = express.Router();
+
+// Fake DB (replace with real DB later)
+let payments = [];
+
+/**
+ * User submits UTR after UPI payment
+ */
+router.post("/upi", (req, res) => {
+  try {
+    const { name, email, utr } = req.body;
+
+    if (!utr) {
+      return res.status(400).json({ error: "UTR required" });
+    }
+
+    const payment = {
+      id: Date.now(),
+      name,
+      email,
+      utr,
+      status: "pending",
+    };
+
+    payments.push(payment);
+
+    res.json({
+      success: true,
+      message: "Payment submitted. Await verification.",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Payment failed" });
+  }
+});
+
+/**
+ * Admin view (simple)
+ */
+router.get("/all", (req, res) => {
+  res.json(payments);
+});
+
+export default router;
