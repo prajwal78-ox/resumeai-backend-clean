@@ -1,12 +1,9 @@
 import express from "express";
+import { analyzeJobMatch } from "../controllers/jobMatchController.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  res.json({
-    success: true,
-    message: "Job Match API working"
-  });
-});
+// Job Match AI route
+router.post("/", analyzeJobMatch);
 
 export default router;
