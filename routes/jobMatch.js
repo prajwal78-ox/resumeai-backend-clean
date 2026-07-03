@@ -1,6 +1,9 @@
+import express from "express";
 import { analyzeJobMatchAI } from "../ai/jobMatchAI.js";
 
-export const analyzeJobMatch = async (req, res) => {
+const router = express.Router();
+
+router.post("/", async (req, res) => {
   try {
     const { resume, jobDescription } = req.body;
 
@@ -10,10 +13,10 @@ export const analyzeJobMatch = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      score: 0,
-      matchingSkills: [],
-      missingSkills: [],
-      suggestions: ["Server error"],
+      success: false,
+      message: err.message,
     });
   }
-};
+});
+
+export default router;
