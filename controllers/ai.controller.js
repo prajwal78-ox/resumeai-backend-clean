@@ -1,7 +1,7 @@
 import { callOpenRouter } from "../services/openrouter.service.js";
 
 /* =========================
-   SUMMARY AI
+   IMPROVE SUMMARY
 ========================= */
 export const improveSummary = async (req, res) => {
   try {
@@ -15,11 +15,13 @@ export const improveSummary = async (req, res) => {
     }
 
     const prompt = `
-Improve this resume summary in a professional way:
+You are a professional resume writer.
 
-"${summary}"
+Rewrite this summary in a strong, ATS-friendly way:
 
-Return only the improved summary text. No explanations.
+${summary}
+
+Return ONLY the improved summary text.
 `;
 
     const result = await callOpenRouter(prompt);
@@ -32,13 +34,15 @@ Return only the improved summary text. No explanations.
       success: true,
       summary: result,
     });
+
   } catch (err) {
-    console.error("🔥 SUMMARY AI ERROR:", err);
+    console.log("🔥 SUMMARY ERROR:", err?.response?.data || err);
 
     return res.status(500).json({
       success: false,
-      message: "AI failed to generate summary",
+      message: "AI failed",
       error: err.message,
+      raw: err?.response?.data || null,
     });
   }
 };
@@ -58,19 +62,19 @@ export const analyzeATS = async (req, res) => {
     }
 
     const prompt = `
-You are an ATS resume expert.
+You are an ATS (Applicant Tracking System) expert.
 
-Analyze this resume and return ONLY valid JSON (no text before or after).
+Analyze this resume and return ONLY valid JSON.
 
 Resume:
 ${JSON.stringify(resume)}
 
-Return format:
+Return format (STRICT JSON ONLY):
 {
-  "score": 0-100,
-  "summary": "short analysis",
-  "strengths": ["skill1", "skill2"],
-  "improvements": ["improvement1", "improvement2"]
+  "score": 0,
+  "summary": "",
+  "strengths": [],
+  "improvements": []
 }
 `;
 
@@ -84,8 +88,8 @@ Return format:
 
     try {
       parsed = JSON.parse(result);
-    } catch (e) {
-      console.error("🔥 JSON PARSE ERROR:", result);
+    } catch (err) {
+      console.log("🔥 JSON PARSE FAILED:", result);
 
       return res.status(500).json({
         success: false,
@@ -98,13 +102,15 @@ Return format:
       success: true,
       analysis: parsed,
     });
+
   } catch (err) {
-    console.error("🔥 ATS AI ERROR:", err);
+    console.log("🔥 ATS ERROR:", err?.response?.data || err);
 
     return res.status(500).json({
       success: false,
-      message: "AI failed to analyze ATS",
+      message: "AI failed",
       error: err.message,
+      raw: err?.response?.data || null,
     });
   }
 };
