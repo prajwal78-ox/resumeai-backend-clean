@@ -1,44 +1,38 @@
-import { askAI } from "../services/openrouter.service.js";
+import { callOpenRouter } from "../services/openrouter.service.js";
 
-export const improveSummary = async (req, res) => {
+export const analyzeATS = async (req, res) => {
   try {
-    const { summary } = req.body;
-
-    if (!summary || !summary.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Summary is required",
-      });
-    }
+    const { resume } = req.body;
 
     const prompt = `
-You are an expert resume writer.
+You are an ATS resume analyzer.
 
-Rewrite the following professional summary into a powerful, ATS-friendly resume summary.
+Analyze this resume:
+${JSON.stringify(resume)}
 
-Rules:
-- Keep it 2–4 lines
-- Make it impactful and professional
-- Highlight skills and value
-- Do NOT add extra commentary
-
-Input:
-${summary}
+Return JSON with:
+- score (0-100)
+- summary
+- strengths (array)
+- improvements (array)
 `;
 
-    const result = await askAI(prompt);
+    const aiResponse = await callOpenRouter(prompt);
+
+    const parsed = JSON.parse(aiResponse);
 
     return res.json({
       success: true,
-      summary: result,
+      analysis: parsed
     });
 
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.log("ATS ERROR:", err.message);
 
     return res.status(500).json({
       success: false,
-      message: "AI failed to generate summary",
+      message: "ATS analysis failed",
+      error: err.message
     });
   }
 };
