@@ -1,13 +1,10 @@
 import express from "express";
-import {
-  improveSummary,
-  analyzeATS
-} from "../controllers/ai.controller.js";
+import { improveSummary } from "../controllers/ai.controller.js";
+import { auth } from "../middleware/auth.middleware.js";
+import { checkCredits } from "../middleware/credits.middleware.js";
 
 const router = express.Router();
 
-/* AI ROUTES */
-router.post("/summary", improveSummary);
-router.post("/ats/analyze", analyzeATS);
+router.post("/summary", auth, checkCredits, improveSummary);
 
 export default router;
