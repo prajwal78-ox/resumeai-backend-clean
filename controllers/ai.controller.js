@@ -1,34 +1,61 @@
 import { callOpenRouter } from "../services/openrouter.service.js";
 
+/* ✅ SUMMARY AI */
+export const improveSummary = async (req, res) => {
+  try {
+    const { summary } = req.body;
+
+    const prompt = `
+Improve this resume summary:
+${summary}
+
+Return only improved text.
+`;
+
+    const result = await callOpenRouter(prompt);
+
+    return res.json({
+      success: true,
+      summary: result
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Summary AI failed",
+      error: err.message
+    });
+  }
+};
+
+/* ✅ ATS ANALYZER */
 export const analyzeATS = async (req, res) => {
   try {
     const { resume } = req.body;
 
     const prompt = `
-You are an ATS resume analyzer.
+You are an ATS expert.
 
 Analyze this resume:
 ${JSON.stringify(resume)}
 
-Return JSON with:
-- score (0-100)
-- summary
-- strengths (array)
-- improvements (array)
+Return JSON:
+{
+  "score": number,
+  "summary": string,
+  "strengths": [],
+  "improvements": []
+}
 `;
 
-    const aiResponse = await callOpenRouter(prompt);
-
-    const parsed = JSON.parse(aiResponse);
+    const result = await callOpenRouter(prompt);
 
     return res.json({
       success: true,
-      analysis: parsed
+      analysis: JSON.parse(result)
     });
 
   } catch (err) {
-    console.log("ATS ERROR:", err.message);
-
     return res.status(500).json({
       success: false,
       message: "ATS analysis failed",
