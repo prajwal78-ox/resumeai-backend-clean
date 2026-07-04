@@ -4,27 +4,41 @@ export const improveSummary = async (req, res) => {
   try {
     const { summary } = req.body;
 
-    if (!summary) {
+    if (!summary || !summary.trim()) {
       return res.status(400).json({
-        error: "Summary is required",
+        success: false,
+        message: "Summary is required",
       });
     }
 
     const prompt = `
-Improve this resume summary to be ATS-friendly, professional, and impactful:
+You are an expert resume writer.
 
+Rewrite the following professional summary into a powerful, ATS-friendly resume summary.
+
+Rules:
+- Keep it 2–4 lines
+- Make it impactful and professional
+- Highlight skills and value
+- Do NOT add extra commentary
+
+Input:
 ${summary}
 `;
 
     const result = await askAI(prompt);
 
     return res.json({
+      success: true,
       summary: result,
     });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      error: "AI processing failed",
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "AI failed to generate summary",
     });
   }
 };

@@ -4,24 +4,26 @@ import dotenv from "dotenv";
 
 import aiRoutes from "./routes/ai.routes.js";
 import experienceRoutes from "./routes/experience.routes.js";
+import atsRoutes from "./routes/ats.routes.js";
 
 dotenv.config();
 
 const app = express();
 
+/* -----------------------------
+   Middleware
+------------------------------ */
 app.use(cors());
 app.use(express.json());
 
 /* -----------------------------
-   Health Routes
+   Health Check Routes
 ------------------------------ */
-
 app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "🚀 ResumeAI Backend is Live",
     status: "running",
-    version: "2.0.0",
     timestamp: new Date().toISOString(),
   });
 });
@@ -29,7 +31,7 @@ app.get("/", (req, res) => {
 app.get("/debug", (req, res) => {
   res.json({
     success: true,
-    message: "Latest backend is running successfully",
+    message: "Backend working correctly",
   });
 });
 
@@ -37,13 +39,18 @@ app.get("/debug", (req, res) => {
    API Routes
 ------------------------------ */
 
+// AI Routes (Summary, etc.)
 app.use("/api/ai", aiRoutes);
+
+// Experience AI
 app.use("/api/experience", experienceRoutes);
 
-/* -----------------------------
-   404 Route
------------------------------- */
+// ATS Analyzer
+app.use("/api/ats", atsRoutes);
 
+/* -----------------------------
+   404 Handler
+------------------------------ */
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -54,9 +61,8 @@ app.use((req, res) => {
 });
 
 /* -----------------------------
-   Server
+   Start Server
 ------------------------------ */
-
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
