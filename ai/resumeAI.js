@@ -1,36 +1,44 @@
 export async function generateResume(prompt) {
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTERAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert resume writer. Improve resumes professionally and return clean, well-structured text.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
-    }
-  );
+  try {
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTERAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an expert resume writer. Return structured JSON with: summary, skills, experience improvements.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        }),
+      }
+    );
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error?.message || "AI request failed");
+    const text = data?.choices?.[0]?.message?.content || "";
+
+    return {
+      success: true,
+      result: text,
+    };
+  } catch (err) {
+    console.error("AI ERROR:", err);
+
+    return {
+      success: false,
+      error: "AI service failed",
+    };
   }
-
-  return {
-    result: data.choices[0].message.content,
-  };
 }

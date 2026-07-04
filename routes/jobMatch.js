@@ -1,5 +1,6 @@
 import express from "express";
-import { analyzeJobMatchAI } from "../ai/jobMatchAI.js";
+import { generateJobMatch } from "../ai/jobMatchAI.js";
+import { success, error } from "../utils/apiResponse.js";
 
 const router = express.Router();
 
@@ -7,15 +8,15 @@ router.post("/", async (req, res) => {
   try {
     const { resume, jobDescription } = req.body;
 
-    const result = await analyzeJobMatchAI(resume, jobDescription);
+    if (!resume || !jobDescription) {
+      return error(res, "Missing fields", 400);
+    }
 
-    res.json(result);
+    const result = await generateJobMatch(resume, jobDescription);
+
+    return success(res, result);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
+    return error(res, "Job match failed");
   }
 });
 

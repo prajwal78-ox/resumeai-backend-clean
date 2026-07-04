@@ -1,41 +1,47 @@
-// FILE: server/ai/jobMatchAI.js
+export async function generateJobMatch(resume, jobDescription) {
+  try {
+    const clean = (t) =>
+      t.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/);
 
-export async function analyzeJobMatchAI(resume, jobDescription) {
-  const prompt = `
-You are an ATS AI system.
+    const resumeWords = clean(resume);
+    const jobWords = clean(jobDescription);
 
-Return ONLY JSON:
-{
-  "score": number (0-100),
-  "matchingSkills": [],
-  "missingSkills": [],
-  "suggestions": []
-}
+    const resumeSet = new Set(resumeWords);
 
-Resume:
-${resume}
+    let matched = [];
+    let missing = [];
 
-Job Description:
-${jobDescription}
-`;
-
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTERAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-      }),
+    for (const w of jobWords) {
+      if (resumeSet.has(w)) matched.push(w);
+      else missing.push(w);
     }
-  );
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
+    matched = [...new Set(matched)].filter((w) => w.length > 2);
+    missing = [...new Set(missing)].filter((w) => w.length > 2);
 
-  return JSON.parse(content);
+    const score = Math.min(
+      100,
+      Math.round((matched.length / jobWords.length) * 100)
+    );
+
+    return {
+      score,
+      matchingSkills: matched.slice(0, 15),
+      missingSkills: missing.slice(0, 15),
+      suggestions: [
+        "Add missing job keywords",
+        "Improve project descriptions",
+        "Use measurable achievements (%, numbers)",
+      ],
+    };
+  } catch (err) {
+    console.error(err);
+
+    return {
+      score: 0,
+      matchingSkills: [],
+      missingSkills: [],
+      suggestions: ["ATS engine error"],
+    };
+  }
 }
