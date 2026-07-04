@@ -17,8 +17,12 @@ export const improveSummary = async (req, res) => {
     const prompt = `
 You are a professional resume writer.
 
-Rewrite this summary in a strong, ATS-friendly way:
+Rewrite this summary to make it:
+- ATS friendly
+- professional
+- high impact
 
+Text:
 ${summary}
 
 Return ONLY the improved summary text.
@@ -42,10 +46,11 @@ Return ONLY the improved summary text.
       success: false,
       message: "AI failed",
       error: err.message,
-      raw: err?.response?.data || null,
+      debug: err?.response?.data || null,
     });
   }
 };
+
 
 /* =========================
    ATS ANALYZER
@@ -62,19 +67,18 @@ export const analyzeATS = async (req, res) => {
     }
 
     const prompt = `
-You are an ATS (Applicant Tracking System) expert.
+You are an ATS expert.
 
-Analyze this resume and return ONLY valid JSON.
+Analyze this resume:
 
-Resume:
 ${JSON.stringify(resume)}
 
-Return format (STRICT JSON ONLY):
+Return ONLY valid JSON in this format:
 {
   "score": 0,
-  "summary": "",
-  "strengths": [],
-  "improvements": []
+  "summary": "string",
+  "strengths": ["string"],
+  "improvements": ["string"]
 }
 `;
 
@@ -110,7 +114,7 @@ Return format (STRICT JSON ONLY):
       success: false,
       message: "AI failed",
       error: err.message,
-      raw: err?.response?.data || null,
+      debug: err?.response?.data || null,
     });
   }
 };
