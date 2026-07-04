@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import experienceRoutes from "./routes/experience.routes.js";
 
 import aiRoutes from "./routes/ai.routes.js";
 
