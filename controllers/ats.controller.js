@@ -11,40 +11,38 @@ export const analyzeATS = async (req, res) => {
       });
     }
 
-    const text = `
+    const prompt = `
+You are an ATS (Applicant Tracking System) expert.
+
+Analyze this resume and return ONLY valid JSON.
+
+Rules:
+- Output must be valid JSON (no markdown, no text)
+- Score must be 0-100
+- Include: summary, strengths, weaknesses, improvements
+
 Resume:
 ${JSON.stringify(resume)}
 `;
 
-    const prompt = `
-You are an ATS (Applicant Tracking System) expert.
+    let result = await askAI(prompt);
 
-Analyze this resume and return a STRICT JSON response.
-
-Rules:
-- Score from 0 to 100
-- Evaluate:
-  1. Skills relevance
-  2. Experience quality
-  3. Formatting
-  4. Keywords match
-  5. Missing sections
-
-Return ONLY JSON like this:
-
-{
-  "score": 85,
-  "summary": "Short analysis of resume quality",
-  "strengths": ["...","..."],
-  "weaknesses": ["...","..."],
-  "improvements": ["...","..."]
-}
-
-Resume:
-${text}
-`;
-
-    const result = await askAI(prompt);
+    // -----------------------------
+    // SAFE PARSING (IMPORTANT FIX)
+    // -----------------------------
+    if (typeof result === "string") {
+      try {
+        result = JSON.parse(result);
+      } catch (e) {
+        // fallback extraction
+        const match = result.match(/\{[\s\S]*\}/);
+        if (match) {
+          result = JSON.parse(match[0]);
+        } else {
+          throw new Error("Invalid AI response format");
+        }
+      }
+    }
 
     return res.json({
       success: true,
@@ -52,11 +50,12 @@ ${text}
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("ATS ERROR:", error);
 
     return res.status(500).json({
       success: false,
       message: "ATS analysis failed",
+      error: error.message,
     });
   }
 };
