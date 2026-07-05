@@ -2,14 +2,20 @@ import mongoose from "mongoose";
 
 const resumeSchema = new mongoose.Schema(
   {
-    userId: String,
-    name: String,
-    email: String,
-    phone: String,
-    summary: String,
-    experience: String,
-    education: String,
-    skills: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+
+    title: {
+      type: String,
+      default: "My Resume",
+    },
+
+    data: {
+      type: Object, // stores full resume JSON
+      required: true,
+    },
   },
   { timestamps: true }
 );

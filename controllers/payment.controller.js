@@ -1,80 +1,21 @@
-	import Payment from "../models/Payment.js";
-import User from "../models/User.js";
+import { success, error } from "../utils/apiResponse.js";
 
-/* =========================
-   CREATE UPI PAYMENT REQUEST
-========================= */
-export const createUPIPayment = async (req, res) => {
+/**
+ * SIMPLE UPI PAYMENT GENERATOR (NO FAKE REDIRECT LOGIC)
+ */
+export const buyPlan = async (req, res) => {
   try {
-    const { plan, amount, transactionId } = req.body;
+    const { plan, amount } = req.body;
 
-    const payment = await Payment.create({
-      userId: req.user.id,
-      plan,
-      amount,
-      transactionId,
-      upiId: "resumeai@upi", // your UPI ID
-      status: "PENDING",
-    });
+    const upiId = "9989066730-3@ybl";
 
-    res.json({
-      success: true,
-      message: "Payment request created",
-      payment,
-      upiLink: `upi://pay?pa=resumeai@upi&pn=ResumeAI&am=${amount}&cu=INR`,
+    const upiLink = `upi://pay?pa=${upiId}&pn=ResumeAI&am=${amount}&cu=INR&tn=${plan}`;
+
+    return success(res, {
+      upiLink,
+      message: "Open in UPI app to complete payment",
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Payment creation failed",
-    });
-  }
-};
-
-/* =========================
-   GET MY PAYMENTS (USER DASHBOARD)
-========================= */
-export const getMyPayments = async (req, res) => {
-  try {
-    const payments = await Payment.find({ userId: req.user.id });
-
-    res.json({
-      success: true,
-      payments,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch payments",
-    });
-  }
-};
-
-/* =========================
-   ADMIN VERIFY PAYMENT
-========================= */
-export const verifyPayment = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const payment = await Payment.findById(id);
-
-    payment.status = "VERIFIED";
-    await payment.save();
-
-    // upgrade user plan
-    await User.findByIdAndUpdate(payment.userId, {
-      plan: payment.plan,
-    });
-
-    res.json({
-      success: true,
-      message: "Payment verified & user upgraded",
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Verification failed",
-    });
+    return error(res, "Payment failed");
   }
 };

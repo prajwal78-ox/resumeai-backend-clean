@@ -5,31 +5,27 @@ export const analyzeATS = async (req, res) => {
     const { resume } = req.body;
 
     const prompt = `
-Analyze this resume for ATS scoring:
+You are an ATS system.
 
-${JSON.stringify(resume)}
+Analyze this resume and give:
+1. ATS Score (0-100)
+2. Missing skills
+3. Improvements
 
-Return:
-- score out of 100
-- strengths
-- weaknesses
-- improvements
+Resume:
+${resume}
 `;
 
     const result = await askAI(prompt);
 
     res.json({
       success: true,
-      analysis: result,
+      result,
     });
-
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
-      analysis: {
-        score: 0,
-        message: "ATS analysis failed safely",
-      },
+      message: "ATS failed",
     });
   }
 };

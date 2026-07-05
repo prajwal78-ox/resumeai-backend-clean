@@ -1,105 +1,47 @@
-import User from "../models/User.js";
+import Resume from "../models/Resume.js";
+import { success, error } from "../utils/apiResponse.js";
 
-/* =========================
-   SAVE RESUME
-========================= */
+/**
+ * SAVE RESUME
+ */
 export const saveResume = async (req, res) => {
   try {
     const { title, data } = req.body;
 
-    const user = await User.findById(req.user.id);
-
-    user.resumes.push({
+    const resume = await Resume.create({
+      userId: req.user.id,
       title,
       data,
     });
 
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Resume saved successfully",
-    });
+    return success(res, { resume });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Save failed",
-    });
+    return error(res, "Failed to save resume");
   }
 };
 
-/* =========================
-   GET ALL RESUMES (DASHBOARD)
-========================= */
+/**
+ * GET ALL RESUMES
+ */
 export const getResumes = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const resumes = await Resume.find({ userId: req.user.id });
 
-    res.json({
-      success: true,
-      resumes: user.resumes || [],
-    });
+    return success(res, { resumes });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch resumes",
-    });
+    return error(res, "Failed to fetch resumes");
   }
 };
 
-/* =========================
-   GET SINGLE RESUME
-========================= */
-export const getResumeById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const user = await User.findById(req.user.id);
-
-    const resume = user.resumes.id(id);
-
-    if (!resume) {
-      return res.status(404).json({
-        success: false,
-        message: "Resume not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      resume,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching resume",
-    });
-  }
-};
-
-/* =========================
-   DELETE RESUME
-========================= */
+/**
+ * DELETE RESUME
+ */
 export const deleteResume = async (req, res) => {
   try {
-    const { id } = req.params;
+    await Resume.findByIdAndDelete(req.params.id);
 
-    const user = await User.findById(req.user.id);
-
-    user.resumes = user.resumes.filter(
-      (r) => r._id.toString() !== id
-    );
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Resume deleted",
-    });
+    return success(res, { message: "Deleted" });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Delete failed",
-    });
+    return error(res, "Delete failed");
   }
 };

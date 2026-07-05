@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
-const usageSchema = new mongoose.Schema({
-  userId: String,
-  aiCalls: {
-    type: Number,
-    default: 0,
+const usageSchema = new mongoose.Schema(
+  {
+    userId: String,
+    action: String, // "resume_created", "ai_used"
   },
-  lastUsed: Date,
-});
+  { timestamps: true }
+);
 
 export default mongoose.model("Usage", usageSchema);
