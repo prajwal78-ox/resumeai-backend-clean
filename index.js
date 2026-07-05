@@ -2,62 +2,72 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import { apiLimiter } from "./middleware/rateLimit.js";
+import { connectDB } from "./config/db.js";
 
-// Routes
+/* ROUTES */
 import authRoutes from "./routes/auth.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import atsRoutes from "./routes/ats.routes.js";
 import experienceRoutes from "./routes/experience.routes.js";
-import resumeRoutes from "./routes/resume.js";
+import resumeRoutes from "./routes/resume.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 
+import { apiLimiter } from "./middleware/rateLimit.js";
+
+/* ENV */
 dotenv.config();
 
+/* INIT APP */
 const app = express();
 
-// Middleware
+/* =========================
+   MIDDLEWARE (ORDER MATTERS)
+========================= */
 app.use(cors());
 app.use(express.json());
+app.use(apiLimiter);
 
-// Global API rate limiter
-app.use("/api", apiLimiter);
-
-// Health check
+/* =========================
+   HEALTH CHECK
+========================= */
 app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "🚀 ResumeAI SaaS Backend Running",
-    version: "1.0.0"
+    status: "OK",
   });
 });
 
-// API Routes
+/* =========================
+   DATABASE CONNECTION
+========================= */
+connectDB();
+
+/* =========================
+   ROUTES
+========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/ats", atsRoutes);
 app.use("/api/experience", experienceRoutes);
 app.use("/api/resume", resumeRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/billing", billingRoutes);
 
-// 404 handler
+/* =========================
+   404 HANDLER
+========================= */
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: "API route not found"
+    message: "Route not found",
   });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-
-  res.status(500).json({
-    success: false,
-    message: "Internal Server Error"
-  });
-});
-
+/* =========================
+   START SERVER
+========================= */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

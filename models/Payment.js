@@ -2,13 +2,27 @@ import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema(
   {
-    userId: String,
-    plan: String,
-    amount: Number,
-    credits: Number,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+    plan: {
+      type: String,
+      enum: ["FREE", "PRO"],
+      default: "FREE",
+    },
+
+    amount: {
+      type: Number,
+      default: 0,
+    },
+
+    upiId: String,
+
+    transactionId: String,
+
     status: {
       type: String,
-      default: "success",
+      enum: ["PENDING", "VERIFIED", "REJECTED"],
+      default: "PENDING",
     },
   },
   { timestamps: true }
