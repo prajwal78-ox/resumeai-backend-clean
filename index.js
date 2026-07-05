@@ -12,7 +12,6 @@ import experienceRoutes from "./routes/experience.routes.js";
 import resumeRoutes from "./routes/resume.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
-import upiRoutes from "./routes/upi.routes.js";
 
 /* MIDDLEWARE */
 import { apiLimiter } from "./middleware/rateLimit.js";
